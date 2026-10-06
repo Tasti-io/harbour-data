@@ -63,7 +63,7 @@ check("every person works at a real site", STAFF.every((s) => SITES.some((x) => 
 check("every role is defined", STAFF.every((s) => ROLES[s.role]));
 check("ids are unique", new Set(STAFF.map((s) => s.id)).size === STAFF.length);
 check("exactly one director, the owner", STAFF.filter((s) => s.kind === "director").length === 1 && person("E001").role === "owner");
-check("every room has a manager or lead and a kitchen", SITES.every((x) => STAFF.some((s) => s.site === x.id && ROLES[s.role].side === "boh")));
+check("every room has a kitchen", SITES.every((x) => STAFF.some((s) => s.site === x.id && ROLES[s.role].side === "boh")));
 
 console.log("\nthe words");
 const src = readdirSync(new URL("../src", import.meta.url)).map((f) => readFileSync(new URL(`../src/${f}`, import.meta.url), "utf8")).join("\n");
