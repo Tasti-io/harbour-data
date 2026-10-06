@@ -60,7 +60,7 @@ check("no other listing is off policy", offPolicy.length === planted.size && off
 
 console.log("\nthe words");
 const src = readdirSync(new URL("../src", import.meta.url)).map((f) => readFileSync(new URL(`../src/${f}`, import.meta.url), "utf8")).join("\n");
-check("no em dashes", !src.includes("—"));
+check("no em dashes", !src.includes("\u2014"));
 
 console.log(failed ? `\n${failed} failure(s)` : "\nall passed");
 process.exit(failed ? 1 : 0);
