@@ -8,7 +8,7 @@
  * reader's sample invoice.
  */
 import { readFileSync, readdirSync } from "node:fs";
-import { MENU, INGREDIENTS, ingredient, menuItem, CHANNELS, POLICY, listings, appPriceFor, roundUpToEnding, SITES, GROUP } from "../src/index.js";
+import { MENU, INGREDIENTS, ingredient, menuItem, CHANNELS, POLICY, listings, appPriceFor, roundUpToEnding, SITES, GROUP, STAFF, ROLES, person } from "../src/index.js";
 
 let failed = 0;
 const check = (name, cond) => {
@@ -57,6 +57,13 @@ const offPolicy = CHANNELS.flatMap((c) => L[c.id].filter((l) => {
   return l.cents !== want;
 }).map((l) => `${c.id}:${l.itemId}`));
 check("no other listing is off policy", offPolicy.length === planted.size && offPolicy.every((k) => planted.has(k)));
+
+console.log("\nthe people");
+check("every person works at a real site", STAFF.every((s) => SITES.some((x) => x.id === s.site) && (s.alsoAt ?? []).every((a) => SITES.some((x) => x.id === a))));
+check("every role is defined", STAFF.every((s) => ROLES[s.role]));
+check("ids are unique", new Set(STAFF.map((s) => s.id)).size === STAFF.length);
+check("exactly one director, the owner", STAFF.filter((s) => s.kind === "director").length === 1 && person("E001").role === "owner");
+check("every room has a manager or lead and a kitchen", SITES.every((x) => STAFF.some((s) => s.site === x.id && ROLES[s.role].side === "boh")));
 
 console.log("\nthe words");
 const src = readdirSync(new URL("../src", import.meta.url)).map((f) => readFileSync(new URL(`../src/${f}`, import.meta.url), "utf8")).join("\n");

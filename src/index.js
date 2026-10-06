@@ -11,3 +11,4 @@ export * from "./group.js";
 export * from "./ingredients.js";
 export * from "./menu.js";
 export * from "./channels.js";
+export * from "./staff.js";
