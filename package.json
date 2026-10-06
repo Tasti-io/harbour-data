@@ -1,0 +1,11 @@
+{
+  "name": "harbour-data",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "The fictional Harbour & Co that every Tasti demo runs on. Vendored into each demo by sync.mjs.",
+  "scripts": {
+    "check": "node scripts/selftest.mjs",
+    "sync": "node sync.mjs"
+  }
+}
