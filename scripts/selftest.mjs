@@ -8,7 +8,7 @@
  * reader's sample invoice.
  */
 import { readFileSync, readdirSync } from "node:fs";
-import { MENU, INGREDIENTS, ingredient, menuItem, CHANNELS, POLICY, listings, appPriceFor, roundUpToEnding, SITES, GROUP, STAFF, ROLES, person } from "../src/index.js";
+import { MENU, INGREDIENTS, ingredient, menuItem, CHANNELS, POLICY, listings, appPriceFor, roundUpToEnding, SITES, GROUP, STAFF, ROLES, person, ROTA, OPEN_BY_DOW, WAGES, dayKind } from "../src/index.js";
 
 let failed = 0;
 const check = (name, cond) => {
@@ -64,6 +64,21 @@ check("every role is defined", STAFF.every((s) => ROLES[s.role]));
 check("ids are unique", new Set(STAFF.map((s) => s.id)).size === STAFF.length);
 check("exactly one director, the owner", STAFF.filter((s) => s.kind === "director").length === 1 && person("E001").role === "owner");
 check("every room has a kitchen", SITES.every((x) => STAFF.some((s) => s.site === x.id && ROLES[s.role].side === "boh")));
+
+console.log("\nthe rota");
+const kinds = ["wk", "fri", "sat", "sun"];
+check("every site has a rota for every day kind", SITES.every((x) => kinds.every((k) => Array.isArray(ROTA[x.id]?.[k]) && ROTA[x.id][k].length)));
+check("every rota role is a defined role with a wage", Object.values(ROTA).every((k) => Object.values(k).flat().every(([r]) => ROLES[r] && WAGES[r] > 0)));
+check("no wage is below the BC minimum of $18.25", Object.values(WAGES).every((c) => c >= 1825));
+check("seven days of opening hours", OPEN_BY_DOW.length === 7 && OPEN_BY_DOW.every(([a, b]) => b > a));
+check("friday runs the friday rota, sunday the sunday one", dayKind(5) === "fri" && dayKind(0) === "sun" && dayKind(2) === "wk");
+// A rota may ask for more people than a site employs. That is deliberate: demo-tips
+// fills one shift per person per day and leaves the rest unfilled, "as real rotas
+// do", and the Tomorrow tab names those slots instead of inventing staff for them.
+// What must hold is weaker: every role a site's rota calls for is a role somebody
+// at that site actually does, so no slot is unfillable by definition.
+check("every rota role is one somebody at that site does", SITES.every((x) => kinds.every((k) =>
+  ROTA[x.id][k].every(([r]) => STAFF.some((s) => s.role === r && (s.site === x.id || (s.alsoAt ?? []).includes(x.id)))))));
 
 console.log("\nthe words");
 const src = readdirSync(new URL("../src", import.meta.url)).map((f) => readFileSync(new URL(`../src/${f}`, import.meta.url), "utf8")).join("\n");
